@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sto.customerapp.excel.employee.dao.DownExcelDao">
+
+    <select id="lockRecordBySeqId" parameterType="map">
+        update tab_export_excel  t 
+        set 
+        	ISFINISH=#{flagnumber}
+        where 
+        	RECORDNUMBER = #{seqid}
+    </select>
+
+    <update id="updateDownInfo" parameterType="com.sto.customerapp.excel.employee.entity.DownExcel">
+        UPDATE tab_export_excel t 
+        set 
+        	t.ISFINISH =#{finishOrNot},
+        	EXCELURL=#{downUrl},
+        	SERVERIP=#{serviceIp}
+        where 
+        	RECORDNUMBER=#{infoId}
+    </update>
+
+    <select id="queryDownInfo" parameterType="map" resultType="com.sto.customerapp.excel.employee.entity.DownExcel">
+		select /*+index(t EXPORT_EXCEL_IDX1)*/ t.RECORDNUMBER as infoId,
+		       t.SITENAME as downSite,
+		       to_char(t.EXPORTDATE,'yyyy-MM-dd hh24:mi:ss') as downTime,
+		       t.QUERYCRITERIA as queryJson,
+		       t.ISFINISH as finishOrNot,
+		       t.MODULENAME as moduleType,
+		       t.EXPORTTYPE as exceltype,
+		       t.EXCELURL as downUrl,
+		       #{seviceIp} as serviceIp
+		  from tab_export_excel t
+		 where 1=1
+		 	and EXPORTDATE >= sysdate - 1
+   			and EXPORTDATE &lt;= sysdate
+		    and t.ISFINISH = 0
+		    and t.MODULENAME=#{type}
+		    and LOCKFLAG=#{seqid}
+	</select>
+	
+	<select id="queryDownInfoAll" parameterType="map" resultType="com.sto.customerapp.excel.employee.entity.DownExcel">
+		select /*+index(t EXPORT_EXCEL_IDX1)*/ t.RECORDNUMBER as infoId,
+		       t.SITENAME as downSite,
+		       to_char(t.EXPORTDATE,'yyyy-MM-dd hh24:mi:ss') as downTime,
+		       t.QUERYCRITERIA as queryJson,
+		       t.ISFINISH as finishOrNot,
+		       t.MODULENAME as moduleType,
+		       t.EXPORTTYPE as exceltype,
+		       t.EXCELURL as downUrl,
+		       #{seviceIp} as serviceIp
+		  from tab_export_excel t
+		 where t.ISFINISH = 0 or t.ISFINISH = -1
+	</select>
+	
+	<select id="select" resultType="map" parameterType="java.lang.String" >
+	    ${_parameter}
+	</select>
+</mapper>
